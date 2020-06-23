@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:id="@+id/otherFunctionLayout">
+        <Button
+            android:id="@+id/buttonSave"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Save" />
+        <Button
+            android:id="@+id/buttonUndo"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Undo"
+            android:layout_marginLeft="235dp"/>
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.99">
+
+    </ImageView>
+    <LinearLayout
+        android:id="@+id/getImageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.01"
+        android:visibility="visible">
+
+        <Button
+            android:id="@+id/buttonLoadFromGallery"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Load Picture From Gallery " />
+
+        <Button
+            android:id="@+id/buttonLoadFromCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Load Picture From Camera " />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:id="@+id/editFunctionLayout">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Using Pixel:"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"/>
+            <Button
+                android:id="@+id/buttonPixelNegative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Negative"/>
+            <Button
+                android:id="@+id/buttonPixelGrayScale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GrayScale"/>
+            <Button
+                android:id="@+id/buttonPixelBlackAndWhite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="B&amp;W"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Using 4*5 ColorMatrix:"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"/>
+            <Button
+                android:id="@+id/buttonNegative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Negative"/>
+            <Button
+                android:id="@+id/buttonGrayScale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GrayScale"/>
+            <Button
+                android:id="@+id/buttonBlackAndWhite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="B&amp;W"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
