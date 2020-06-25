@@ -220,16 +220,15 @@ public class ImageProcess extends AppCompatActivity {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         //This is the directory in which the file will be created. This is the default location of Camera photos
-        storageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "Camera");
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+        storageDir = new File(getExternalFilesDir(null),imageFileName+".jpg");
+        //File image = File.createTempFile(
+          //      imageFileName,  /* prefix */
+            //    ".jpg",         /* suffix */
+              //  storageDir      /* directory */
+        //);
         // Save a file: path for using again
-        cameraFilePath = "file://" + image.getAbsolutePath();
-        return image;
+        cameraFilePath = "file://" + storageDir.getAbsolutePath();
+        return storageDir;
     }
 
     private Bitmap pasteWaterMark(Bitmap savingBitmap) {
