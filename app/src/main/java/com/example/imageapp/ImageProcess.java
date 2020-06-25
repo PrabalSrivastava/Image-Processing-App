@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.io.File;
@@ -32,46 +33,62 @@ import java.util.Random;
 
 public class ImageProcess extends AppCompatActivity {
 
+    ImageView image;
+    Button buttonLoadFromGallery;
+    Button buttonLoadFromCamera;
+    LinearLayout editFunctionLayout, otherFunctionLayout, getImageLayout;
+    //edit layout
     Button  buttonUndo,buttonSave;
-    Bitmap bitmap,editedBitmap;
     ImageView imageView;
     Button buttonGrayScale,buttonNegative,buttonBlackAndWhite;
     Button buttonPixelGrayScale,buttonPixelNegative,buttonPixelBlackAndWhite;
+    private static final int PICK_IMAGE = 100;
+    private static final int CAMERA_REQUEST_CODE = 200;
+    //private static final int MY_CAMERA_PERMISSION_CODE = 300;
+    Bitmap bitmap, editedBitmap;
+    private String path;
+    private File imageFile;
+    private String imageFileName;
+    private File storageDir;
+    private Uri imageURI;
+    private String cameraFilePath;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_process);
-        //byte[] bytes = getIntent().getByteArrayExtra("bitmapbytes");
-        File imgFile=getIntent().getParcelableExtra("bitmapbytes");
-        /*Log.d("My",path);
-        Uri capturedImage=Uri.parse(path);
-        try {
-            bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(capturedImage));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }*/
-        //File imgFile = new  File(path);
+        image=(ImageView)findViewById(R.id.image);
+        getImageLayout=(LinearLayout)findViewById(R.id.getImageLayout);
+        editFunctionLayout=(LinearLayout)findViewById(R.id.editFunctionLayout);
+        otherFunctionLayout=(LinearLayout)findViewById(R.id.otherFunctionLayout);
 
-        if(imgFile.exists()){
+        buttonLoadFromGallery = (Button)findViewById(R.id.buttonLoadFromGallery);
+        buttonLoadFromGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openGallery();
 
-            bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            }
+        });
+        buttonLoadFromCamera = (Button)findViewById(R.id.buttonLoadFromCamera);
+        buttonLoadFromCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                captureFromCamera();
+            }
+        });
 
-            //ImageView myImage = (ImageView) findViewById(R.id.imageviewTest);
 
-            //myImage.setImageBitmap(myBitmap);
 
-        }
-        //bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-        imageView = (ImageView) findViewById(R.id.imageView);
-        imageView.setVisibility(View.VISIBLE);
-        //imageView.setImageURI(Uri.fromFile(new File(path)));
-        imageView.setImageBitmap(bitmap);
+    }
+
+    private void setEditLayoutButtons() {
+
         buttonUndo = (Button) findViewById(R.id.buttonUndo);
         buttonUndo.setVisibility(View.INVISIBLE);
         buttonUndo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setImageBitmap(bitmap);
+                image.setImageBitmap(bitmap);
                 editedBitmap=bitmap;
             }
         });
@@ -93,6 +110,7 @@ public class ImageProcess extends AppCompatActivity {
         buttonNegative.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                image.setImageBitmap(bitmap);
                 negativeImage();
                 //changeImageUsingPixel(1);
             }
@@ -137,6 +155,81 @@ public class ImageProcess extends AppCompatActivity {
                 changeImageUsingPixel(3);
             }
         });
+    }
+
+    private void openGallery() {
+        try {
+            Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+            startActivityForResult(gallery, PICK_IMAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(),"X"+e.toString(),Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private void captureFromCamera() {
+        try {
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", createImageFile()));
+            startActivityForResult(intent, CAMERA_REQUEST_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(),"Error: Permission Denied.\nProvide Storage Permission manually.",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE)
+        {
+            imageURI = data.getData();
+
+        }
+        else if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE)
+        {
+            imageURI=Uri.parse(cameraFilePath);
+        }
+        image.setImageURI(imageURI);
+        setEditLayoutVisible();
+        setEditLayoutButtons();
+        convertUriToBitmap(imageURI);
+
+    }
+
+    private void convertUriToBitmap(Uri imageURI) {
+        try {
+            bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageURI));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void setEditLayoutVisible() {
+        getImageLayout.setVisibility(View.GONE);
+        editFunctionLayout.setVisibility(View.VISIBLE);
+        otherFunctionLayout.setVisibility(View.VISIBLE);
+
+    }
+
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        //This is the directory in which the file will be created. This is the default location of Camera photos
+        storageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM), "Camera");
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+        // Save a file: path for using again
+        cameraFilePath = "file://" + image.getAbsolutePath();
+        return image;
     }
 
     private Bitmap pasteWaterMark(Bitmap savingBitmap) {
@@ -201,7 +294,7 @@ public class ImageProcess extends AppCompatActivity {
         paint.setColorFilter(filter);
 
         canvas.drawBitmap(bitmap, 0, 0, paint);
-        imageView.setImageBitmap(editedBitmap);
+        image.setImageBitmap(editedBitmap);
         buttonUndo.setVisibility(View.VISIBLE);
         buttonSave.setVisibility(View.VISIBLE);
     }
@@ -234,7 +327,7 @@ public class ImageProcess extends AppCompatActivity {
         paint.setColorFilter(filter);
 
         canvas.drawBitmap(bitmap, 0, 0, paint);
-        imageView.setImageBitmap(editedBitmap);
+        image.setImageBitmap(editedBitmap);
 
         buttonUndo.setVisibility(View.VISIBLE);
         buttonSave.setVisibility(View.VISIBLE);
@@ -264,7 +357,7 @@ public class ImageProcess extends AppCompatActivity {
         paint.setColorFilter(filter);
 
         canvas.drawBitmap(bitmap, 0, 0, paint);
-        imageView.setImageBitmap(editedBitmap);
+        image.setImageBitmap(editedBitmap);
 
         buttonUndo.setVisibility(View.VISIBLE);
         buttonSave.setVisibility(View.VISIBLE);
@@ -324,12 +417,15 @@ public class ImageProcess extends AppCompatActivity {
                 editedBitmap.setPixel(x, y, newColor);
             }
         }
-        imageView.setImageBitmap(editedBitmap);
+        image.setImageBitmap(editedBitmap);
 
         buttonUndo.setVisibility(View.VISIBLE);
         buttonSave.setVisibility(View.VISIBLE);
     }
+
+
 }
+
 //waste methods
 /*public void openImageProcessActivity() {
 
