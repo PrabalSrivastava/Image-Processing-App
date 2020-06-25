@@ -252,9 +252,9 @@ public class ImageProcess extends AppCompatActivity {
     private void saveImage(Bitmap editedBitmap) throws FileNotFoundException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "PNG_"+"Edited_" + timeStamp + "_";
-        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),"camera"); //Creates app specific folder
+         //Creates app specific folder
         //path.mkdirs();
-        File imageFile = new File(path, imageFileName+".png"); // Imagename.png
+        File imageFile = new File(getExternalFilesDir(null), imageFileName+".png"); // Imagename.png
         FileOutputStream out = new FileOutputStream(imageFile);
         try{
             editedBitmap.compress(Bitmap.CompressFormat.PNG, 100, out); // Compress Image
