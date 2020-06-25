@@ -10,9 +10,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -185,26 +187,38 @@ public class ImageProcess extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == PICK_IMAGE)
         {
             imageURI = data.getData();
-
+            convertUriToBitmap(imageURI);
         }
         else if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE)
         {
             imageURI=Uri.parse(cameraFilePath);
+            convertUriToBitmap(imageURI);
+            if (Build.VERSION.SDK_INT<=28){
+                bitmap=rotateBitmap(bitmap);
+            }
         }
-        image.setImageURI(imageURI);
         setEditLayoutVisible();
         setEditLayoutButtons();
-        convertUriToBitmap(imageURI);
 
+        image.setImageBitmap(bitmap);
     }
 
     private void convertUriToBitmap(Uri imageURI) {
         try {
-            bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageURI));
+            Bitmap convertedBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageURI));
+            bitmap=convertedBitmap;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private Bitmap rotateBitmap(Bitmap convertedBitmap) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(convertedBitmap, convertedBitmap.getWidth(), convertedBitmap.getHeight(), true);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
+        return rotatedBitmap;
     }
 
     private void setEditLayoutVisible() {
@@ -269,7 +283,7 @@ public class ImageProcess extends AppCompatActivity {
                     Log.i("ExternalStorage", "-> uri=" + uri);
                 }
             });
-            Toast.makeText(getApplicationContext(),"New Image Saved!",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"New Image Saved!"+"\nLocation: "+imageFile.getAbsolutePath().toString(),Toast.LENGTH_SHORT).show();
         } catch(Exception e) {
         }
     }
@@ -293,6 +307,7 @@ public class ImageProcess extends AppCompatActivity {
         paint.setColorFilter(filter);
 
         canvas.drawBitmap(bitmap, 0, 0, paint);
+
         image.setImageBitmap(editedBitmap);
         buttonUndo.setVisibility(View.VISIBLE);
         buttonSave.setVisibility(View.VISIBLE);
@@ -326,6 +341,7 @@ public class ImageProcess extends AppCompatActivity {
         paint.setColorFilter(filter);
 
         canvas.drawBitmap(bitmap, 0, 0, paint);
+
         image.setImageBitmap(editedBitmap);
 
         buttonUndo.setVisibility(View.VISIBLE);
@@ -356,6 +372,7 @@ public class ImageProcess extends AppCompatActivity {
         paint.setColorFilter(filter);
 
         canvas.drawBitmap(bitmap, 0, 0, paint);
+
         image.setImageBitmap(editedBitmap);
 
         buttonUndo.setVisibility(View.VISIBLE);
@@ -416,6 +433,8 @@ public class ImageProcess extends AppCompatActivity {
                 editedBitmap.setPixel(x, y, newColor);
             }
         }
+
+
         image.setImageBitmap(editedBitmap);
 
         buttonUndo.setVisibility(View.VISIBLE);
